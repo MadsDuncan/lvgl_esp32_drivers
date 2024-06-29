@@ -147,6 +147,7 @@ bool ft6x36_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 #if CONFIG_LV_FT6X36_INVERT_Y
     touch_inputs.last_y = LV_VER_RES - touch_inputs.last_y;
 #endif
+
     data->point.x = touch_inputs.last_x;
     data->point.y = touch_inputs.last_y;
     data->state = touch_inputs.current_state;

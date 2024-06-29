@@ -40,6 +40,8 @@ SOFTWARE.
 
 #include "i2c_manager.h"
 
+// TODO: I2C_NUM_0 not defined for some reason. Might be due to pragma once overlap in hal/i2c_types.h and driver/i2c_types.h
+#define I2C_NUM_0 0
 
 #if defined __has_include
 	#if __has_include ("esp_idf_version.h")
@@ -66,8 +68,8 @@ static const uint8_t ACK_CHECK_EN = 1;
 		#define I2C_MANAGER_0_PULLUPS 	false
 	#endif
 
-	#define I2C_MANAGER_0_TIMEOUT 		( CONFIG_I2C_MANAGER_0_TIMEOUT / portTICK_DELAY_MS )
-	#define I2C_MANAGER_0_LOCK_TIMEOUT	( CONFIG_I2C_MANAGER_0_LOCK_TIMEOUT / portTICK_DELAY_MS )
+	#define I2C_MANAGER_0_TIMEOUT 		( CONFIG_I2C_MANAGER_0_TIMEOUT / portTICK_PERIOD_MS )
+	#define I2C_MANAGER_0_LOCK_TIMEOUT	( CONFIG_I2C_MANAGER_0_LOCK_TIMEOUT / portTICK_PERIOD_MS )
 #endif
 
 
@@ -79,8 +81,8 @@ static const uint8_t ACK_CHECK_EN = 1;
 		#define I2C_MANAGER_1_PULLUPS 	false
 	#endif
 
-	#define I2C_MANAGER_1_TIMEOUT 		( CONFIG_I2C_MANAGER_1_TIMEOUT / portTICK_DELAY_MS )
-	#define I2C_MANAGER_1_LOCK_TIMEOUT	( CONFIG_I2C_MANAGER_1_LOCK_TIMEOUT / portTICK_DELAY_MS )
+	#define I2C_MANAGER_1_TIMEOUT 		( CONFIG_I2C_MANAGER_1_TIMEOUT / portTICK_PERIOD_MS )
+	#define I2C_MANAGER_1_LOCK_TIMEOUT	( CONFIG_I2C_MANAGER_1_LOCK_TIMEOUT / portTICK_PERIOD_MS )
 #endif
 
 #define ERROR_PORT(port, fail) { \
@@ -168,8 +170,8 @@ esp_err_t I2C_FN(_init)(i2c_port_t port) {
 			ESP_LOGW(TAG, "If it was already open, we'll use it with whatever settings were used "
 			              "to open it. See I2C Manager README for details.");
 		} else {
-			ESP_LOGI(TAG, "Initialised port %d (SDA: %d, SCL: %d, speed: %d Hz.)",
-					 port, conf.sda_io_num, conf.scl_io_num, conf.master.clk_speed);
+//			ESP_LOGI(TAG, "Initialised port %d (SDA: %d, SCL: %d, speed: %d Hz.)",
+//					 (int)port, conf.sda_io_num, conf.scl_io_num, conf.master.clk_speed);
 		}
 
 	}
@@ -186,7 +188,7 @@ esp_err_t I2C_FN(_read)(i2c_port_t port, uint16_t addr, uint32_t reg, uint8_t *b
     // May seem weird, but init starts with a check if it's needed, no need for that check twice.
 	I2C_FN(_init)(port);
 
-   	ESP_LOGV(TAG, "Reading port %d, addr 0x%03x, reg 0x%04x", port, addr, reg);
+//   	ESP_LOGV(TAG, "Reading port %d, addr 0x%03x, reg 0x%04x", port, addr, reg);
 
 	TickType_t timeout = 0;
 	#if defined (I2C_ZERO)
@@ -239,17 +241,17 @@ esp_err_t I2C_FN(_write)(i2c_port_t port, uint16_t addr, uint32_t reg, const uin
     // May seem weird, but init starts with a check if it's needed, no need for that check twice.
 	I2C_FN(_init)(port);
 
-    ESP_LOGV(TAG, "Writing port %d, addr 0x%03x, reg 0x%04x", port, addr, reg);
+//    ESP_LOGV(TAG, "Writing port %d, addr 0x%03x, reg 0x%04x", port, addr, reg);
 
 	TickType_t timeout = 0;
 	#if defined (I2C_ZERO)
 		if (port == I2C_NUM_0) {
-			timeout = (CONFIG_I2C_MANAGER_0_TIMEOUT) / portTICK_DELAY_MS;
+			timeout = (CONFIG_I2C_MANAGER_0_TIMEOUT) / portTICK_PERIOD_MS;
 		}
 	#endif
 	#if defined (I2C_ONE)
 		if (port == I2C_NUM_1) {
-			timeout = (CONFIG_I2C_MANAGER_1_TIMEOUT) / portTICK_DELAY_MS;
+			timeout = (CONFIG_I2C_MANAGER_1_TIMEOUT) / portTICK_PERIOD_MS;
 		}
 	#endif
 
@@ -294,12 +296,12 @@ esp_err_t I2C_FN(_lock)(i2c_port_t port) {
 	TickType_t timeout;
 	#if defined (I2C_ZERO)
 		if (port == I2C_NUM_0) {
-			timeout = (CONFIG_I2C_MANAGER_0_LOCK_TIMEOUT) / portTICK_DELAY_MS;
+			timeout = (CONFIG_I2C_MANAGER_0_LOCK_TIMEOUT) / portTICK_PERIOD_MS;
 		}
 	#endif
 	#if defined (I2C_ONE)
 		if (port == I2C_NUM_1) {
-			timeout = (CONFIG_I2C_MANAGER_1_LOCK_TIMEOUT) / portTICK_DELAY_MS;
+			timeout = (CONFIG_I2C_MANAGER_1_LOCK_TIMEOUT) / portTICK_PERIOD_MS;
 		}
 	#endif
 
